@@ -18,8 +18,20 @@ app.use(
 );
 
 app.use("/customer/auth/*", function auth(req, res, next) {
-  //Write the authenication mechanism here
-  // Test Comment
+  if (req.session.authorization) {
+    let token = req.session.authorization["accessToken"];
+
+    jwt.verify(token, "access", (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: "User not authorized" });
+      } else {
+        req.user = user;
+        next();
+      }
+    });
+  } else {
+    return res.status(403).json({ message: "User not logged in" });
+  }
 });
 
 const PORT = 5000;
